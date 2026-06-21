@@ -328,7 +328,7 @@ let usedCount = parseInt(localStorage.getItem('tubeIdea_used') || '0');
 let isPro = localStorage.getItem('tubeIdea_pro') === 'true';
 
 // Replace with your Stripe payment link
-const STRIPE_LINK = 'https://buy.stripe.com/YOUR_STRIPE_LINK';
+const STRIPE_LINK = 'https://www.paypal.com/send?recipient=zahirirayan1@gmail.com&amount=4.99&currencyCode=USD';
 // Replace with your valid pro keys (comma separated) or use a backend check
 const PRO_KEYS = ['PRO-TUBEIDEA-2024', 'PRO-TUBEIDEA-RAYAN'];
 
@@ -472,7 +472,7 @@ function renderIdeas(ideas, niche) {
       <div style="font-size:1.5rem;margin-bottom:8px">🔒</div>
       <div style="font-family:Space Grotesk,sans-serif;font-weight:700;margin-bottom:6px">You've used all 3 free ideas</div>
       <div style="font-size:.83rem;color:var(--muted);margin-bottom:14px">Upgrade to Pro for unlimited ideas + SEO titles, thumbnails & weekly plans</div>
-      <button onclick="showModal()" style="background:linear-gradient(135deg,#f59e0b,#f97316);color:white;border:none;border-radius:9px;padding:11px 22px;font-family:Space Grotesk,sans-serif;font-weight:700;font-size:.9rem;cursor:pointer">⚡ Upgrade to Pro — $9.99/mo</button>
+      <button onclick="showModal()" style="background:linear-gradient(135deg,#f59e0b,#f97316);color:white;border:none;border-radius:9px;padding:11px 22px;font-family:Space Grotesk,sans-serif;font-weight:700;font-size:.9rem;cursor:pointer">⚡ Upgrade to Pro — $4.99/mo</button>
     `;
     results.appendChild(upsell);
   }
