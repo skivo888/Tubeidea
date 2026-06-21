@@ -1,1 +1,595 @@
-test
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>TubeIdea – YouTube Content Generator</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500&display=swap');
+:root{--red:#FF0000;--red-dim:#cc0000;--bg:#0a0a0a;--surface:#141414;--surface2:#1e1e1e;--border:#2a2a2a;--text:#f0f0f0;--muted:#888;--gold:#f59e0b}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center}
+
+/* Header */
+header{width:100%;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:32px;height:32px;background:var(--red);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.logo-icon svg{width:16px;height:16px;fill:white}
+.logo-text{font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700}
+.logo-text span{color:var(--red)}
+.pro-badge{background:linear-gradient(135deg,#f59e0b,#f97316);color:white;font-size:.65rem;font-weight:700;padding:2px 7px;border-radius:20px;margin-left:6px;font-family:'Space Grotesk',sans-serif}
+.header-right{display:flex;align-items:center;gap:10px}
+.plan-indicator{font-size:.75rem;color:var(--muted);font-weight:500}
+.upgrade-btn{background:linear-gradient(135deg,#f59e0b,#f97316);color:white;border:none;border-radius:8px;padding:7px 14px;font-size:.78rem;font-weight:600;cursor:pointer;font-family:'Space Grotesk',sans-serif;transition:opacity .2s}
+.upgrade-btn:hover{opacity:.85}
+.upgrade-btn.hidden{display:none}
+
+/* Hero */
+.hero{width:100%;max-width:720px;padding:44px 24px 28px;text-align:center}
+.hero h1{font-family:'Space Grotesk',sans-serif;font-size:clamp(1.7rem,4vw,2.6rem);font-weight:700;line-height:1.1;letter-spacing:-1px;margin-bottom:10px}
+.hero h1 em{font-style:normal;color:var(--red)}
+.hero p{color:var(--muted);font-size:.9rem;line-height:1.6}
+
+/* Free limit bar */
+.limit-bar{width:100%;max-width:720px;padding:0 24px;margin-bottom:16px}
+.limit-inner{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.limit-text{font-size:.78rem;color:var(--muted)}
+.limit-text strong{color:var(--text)}
+.limit-track{flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+.limit-fill{height:100%;background:var(--red);border-radius:3px;transition:width .4s}
+.limit-inner.pro-active{border-color:#f59e0b44;background:#f59e0b08}
+.limit-inner.pro-active .limit-text{color:#f59e0b}
+
+/* Tabs */
+.tabs-wrap{width:100%;max-width:720px;padding:0 24px;margin-bottom:4px}
+.tabs{display:flex;gap:3px;background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:4px}
+.tab-btn{flex:1;padding:9px 4px;background:transparent;border:none;border-radius:8px;color:var(--muted);font-family:'Space Grotesk',sans-serif;font-size:.75rem;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;position:relative}
+.tab-btn.active{background:var(--red);color:white}
+.tab-btn:hover:not(.active){color:var(--text);background:var(--surface2)}
+.tab-btn .lock{font-size:.6rem;margin-left:2px}
+
+/* Form */
+.form-wrap{width:100%;max-width:720px;padding:14px 24px 0}
+.tab-panel{display:none}.tab-panel.active{display:block}
+.field{margin-bottom:13px}
+label{display:block;font-size:.73rem;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:7px}
+input[type=text],select,textarea{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Inter',sans-serif;font-size:.9rem;padding:11px 14px;outline:none;transition:border-color .2s}
+input[type=text]:focus,select:focus,textarea:focus{border-color:var(--red)}
+select option{background:#1e1e1e}
+textarea{resize:vertical;min-height:64px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row .field{flex:1;min-width:130px}
+.btn{width:100%;padding:13px;background:var(--red);color:white;border:none;border-radius:10px;font-family:'Space Grotesk',sans-serif;font-size:.93rem;font-weight:600;cursor:pointer;transition:background .2s,transform .1s;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn:hover:not(:disabled){background:var(--red-dim)}
+.btn:active:not(:disabled){transform:scale(.99)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* Results */
+.results{width:100%;max-width:720px;padding:24px 24px 64px}
+.results-header{font-family:'Space Grotesk',sans-serif;font-size:.73rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:12px}
+
+/* Cards */
+.idea-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:17px 19px;margin-bottom:9px;position:relative;transition:border-color .2s}
+.idea-card:hover{border-color:#3a3a3a}
+.idea-num{font-family:'Space Grotesk',sans-serif;font-size:.68rem;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+.idea-title{font-family:'Space Grotesk',sans-serif;font-size:.97rem;font-weight:600;line-height:1.3;margin-bottom:8px;padding-right:60px}
+.idea-meta{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:.68rem;font-weight:500;padding:3px 9px;border-radius:20px;background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
+.tag.format{color:#34d399;border-color:#34d39944;background:#34d39911}
+.tag.potential{color:#60a5fa;border-color:#60a5fa44;background:#60a5fa11}
+.tag.viral{color:#f59e0b;border-color:#f59e0b44;background:#f59e0b11}
+.idea-desc{font-size:.82rem;color:var(--muted);line-height:1.55;margin-top:9px;padding-top:9px;border-top:1px solid var(--border)}
+
+/* Expand */
+.expand-section{border-top:1px solid var(--border);margin-top:9px;padding-top:9px}
+.expand-btn{background:none;border:none;color:var(--muted);font-size:.75rem;cursor:pointer;display:flex;align-items:center;gap:4px;font-family:'Inter',sans-serif;transition:color .2s}
+.expand-btn:hover{color:var(--text)}
+.expand-content{display:none;margin-top:9px}
+.expand-content.open{display:block}
+.detail-row{margin-bottom:8px}
+.detail-label{font-size:.67rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:4px}
+.detail-val{font-size:.82rem;color:var(--text);line-height:1.5;background:var(--surface2);border-radius:8px;padding:9px 12px;border:1px solid var(--border)}
+
+/* Weekly */
+.week-day{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:13px 15px;margin-bottom:8px}
+.day-label{font-family:'Space Grotesk',sans-serif;font-size:.68rem;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px}
+.day-title{font-size:.86rem;font-weight:500;line-height:1.4;margin-bottom:4px}
+.day-meta{font-size:.73rem;color:var(--muted)}
+
+/* Copy */
+.copy-btn{position:absolute;top:13px;right:13px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:4px 9px;font-size:.68rem;cursor:pointer;transition:all .2s}
+.copy-btn:hover{color:var(--text);border-color:#555}
+.copy-btn.copied{color:#34d399;border-color:#34d39944}
+
+/* Loader */
+.loader{display:flex;flex-direction:column;align-items:center;padding:44px 24px;gap:13px}
+.pulse-ring{width:42px;height:42px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--red);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader p{color:var(--muted);font-size:.85rem}
+.error-msg{background:#2a0a0a;border:1px solid #5a1a1a;color:#ff8888;border-radius:10px;padding:13px 17px;font-size:.85rem;margin:13px 0}
+
+/* PRO MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px}
+.modal-overlay.hidden{display:none}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px 28px;max-width:380px;width:100%;text-align:center}
+.modal-icon{font-size:2.5rem;margin-bottom:14px}
+.modal h2{font-family:'Space Grotesk',sans-serif;font-size:1.4rem;font-weight:700;margin-bottom:8px}
+.modal h2 span{color:var(--gold)}
+.modal p{color:var(--muted);font-size:.85rem;line-height:1.6;margin-bottom:20px}
+.modal-features{text-align:left;margin-bottom:22px;display:flex;flex-direction:column;gap:8px}
+.modal-feature{display:flex;align-items:center;gap:8px;font-size:.83rem}
+.modal-feature .check{color:#34d399;font-size:1rem}
+.price-box{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:20px}
+.price-big{font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:700;color:var(--gold)}
+.price-big span{font-size:.9rem;font-weight:400;color:var(--muted)}
+.price-note{font-size:.72rem;color:var(--muted);margin-top:2px}
+.pay-btn{width:100%;padding:14px;background:linear-gradient(135deg,#f59e0b,#f97316);color:white;border:none;border-radius:10px;font-family:'Space Grotesk',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;margin-bottom:10px;transition:opacity .2s}
+.pay-btn:hover{opacity:.88}
+.modal-close{background:none;border:none;color:var(--muted);font-size:.8rem;cursor:pointer;font-family:'Inter',sans-serif}
+.modal-close:hover{color:var(--text)}
+
+/* PRO KEY INPUT */
+.key-section{margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+.key-section p{font-size:.75rem;color:var(--muted);margin-bottom:8px}
+.key-row{display:flex;gap:8px}
+.key-row input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.8rem;padding:9px 11px;outline:none;font-family:'Inter',sans-serif}
+.key-row input:focus{border-color:var(--gold)}
+.key-row button{background:var(--gold);color:white;border:none;border-radius:8px;padding:9px 14px;font-size:.78rem;font-weight:600;cursor:pointer;font-family:'Space Grotesk',sans-serif}
+</style>
+</head>
+<body>
+
+<!-- PRO MODAL -->
+<div class="modal-overlay hidden" id="proModal">
+  <div class="modal">
+    <div class="modal-icon">🚀</div>
+    <h2>Upgrade to <span>Pro</span></h2>
+    <p>You've used your 3 free ideas. Unlock unlimited access to all features.</p>
+    <div class="modal-features">
+      <div class="modal-feature"><span class="check">✓</span> Unlimited idea generation</div>
+      <div class="modal-feature"><span class="check">✓</span> SEO title optimizer</div>
+      <div class="modal-feature"><span class="check">✓</span> Thumbnail concepts</div>
+      <div class="modal-feature"><span class="check">✓</span> Weekly content planner</div>
+      <div class="modal-feature"><span class="check">✓</span> Video description writer</div>
+    </div>
+    <div class="price-box">
+      <div class="price-big">$9.99<span>/month</span></div>
+      <div class="price-note">Cancel anytime • Instant access</div>
+    </div>
+    <button class="pay-btn" onclick="goToStripe()">💳 Subscribe Now — $9.99/mo</button>
+    <div class="key-section">
+      <p>Already subscribed? Enter your access key:</p>
+      <div class="key-row">
+        <input type="text" id="proKeyInput" placeholder="sk-pro-xxxxxxxx"/>
+        <button onclick="activatePro()">Activate</button>
+      </div>
+    </div>
+    <br>
+    <button class="modal-close" onclick="closeModal()">✕ Maybe later</button>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M10 16.5l6-4.5-6-4.5v9zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>
+    </div>
+    <div class="logo-text">Tube<span>Idea</span><span class="pro-badge" id="proBadge" style="display:none">PRO</span></div>
+  </div>
+  <div class="header-right">
+    <span class="plan-indicator" id="planLabel">Free Plan</span>
+    <button class="upgrade-btn" id="upgradeBtn" onclick="showModal()">⚡ Upgrade to Pro</button>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>Your YouTube<br><em>content engine</em></h1>
+  <p>Generate viral ideas, SEO titles, thumbnail concepts & weekly plans — powered by AI.</p>
+</div>
+
+<!-- LIMIT BAR -->
+<div class="limit-bar" id="limitBar">
+  <div class="limit-inner" id="limitInner">
+    <div class="limit-text" id="limitText"><strong>3</strong> free ideas remaining</div>
+    <div class="limit-track"><div class="limit-fill" id="limitFill" style="width:100%"></div></div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs-wrap">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('ideas')">💡 Ideas</button>
+    <button class="tab-btn" onclick="switchTabPro('seo')">🎯 SEO <span class="lock" id="lockSeo"></span></button>
+    <button class="tab-btn" onclick="switchTabPro('thumbnail')">🖼️ Thumb <span class="lock" id="lockThumb"></span></button>
+    <button class="tab-btn" onclick="switchTabPro('weekly')">📅 Plan <span class="lock" id="lockWeekly"></span></button>
+  </div>
+</div>
+
+<div class="form-wrap">
+
+  <!-- IDEAS -->
+  <div class="tab-panel active" id="panel-ideas">
+    <div class="field">
+      <label>Your Niche / Topic</label>
+      <input type="text" id="niche" placeholder="e.g. Personal finance, Gaming, Cooking…"/>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>Channel Style</label>
+        <select id="style">
+          <option value="educational">Educational / Tutorial</option>
+          <option value="entertainment">Entertainment / Fun</option>
+          <option value="vlog">Vlog / Personal</option>
+          <option value="review">Reviews / Comparisons</option>
+          <option value="motivation">Motivation / Self-help</option>
+          <option value="news">News / Commentary</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Number of Ideas</label>
+        <select id="count">
+          <option value="5">5 ideas</option>
+          <option value="8" selected>8 ideas</option>
+          <option value="10">10 ideas</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Target Audience (optional)</label>
+      <textarea id="audience" placeholder="e.g. Beginners aged 18–30, Working moms…"></textarea>
+    </div>
+    <button class="btn" id="ideasBtn" onclick="generateIdeas()">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      Generate Ideas
+    </button>
+  </div>
+
+  <!-- SEO -->
+  <div class="tab-panel" id="panel-seo">
+    <div class="field">
+      <label>Video Topic</label>
+      <input type="text" id="seo-topic" placeholder="e.g. How to save money as a student…"/>
+    </div>
+    <div class="field">
+      <label>Main Keyword</label>
+      <input type="text" id="seo-keyword" placeholder="e.g. save money, budget tips…"/>
+    </div>
+    <div class="field">
+      <label>Tone</label>
+      <select id="seo-tone">
+        <option value="curiosity">Curiosity / Clickbait</option>
+        <option value="howto">How-To / Tutorial</option>
+        <option value="listicle">Listicle / Number</option>
+        <option value="story">Story / Personal</option>
+        <option value="challenge">Challenge / Shocking</option>
+      </select>
+    </div>
+    <button class="btn" id="seoBtn" onclick="generateSEO()">Generate SEO Titles</button>
+  </div>
+
+  <!-- THUMBNAIL -->
+  <div class="tab-panel" id="panel-thumbnail">
+    <div class="field">
+      <label>Video Title or Topic</label>
+      <input type="text" id="thumb-title" placeholder="e.g. I Tried Living on $5 a Day…"/>
+    </div>
+    <div class="field">
+      <label>Style Preference</label>
+      <select id="thumb-style">
+        <option value="face reaction">Face Reaction (MrBeast style)</option>
+        <option value="bold text">Bold Text + Color Block</option>
+        <option value="before after">Before & After</option>
+        <option value="minimalist">Minimalist / Clean</option>
+        <option value="dramatic">Dramatic / Cinematic</option>
+      </select>
+    </div>
+    <button class="btn" id="thumbBtn" onclick="generateThumbnail()">Generate Thumbnail Concepts</button>
+  </div>
+
+  <!-- WEEKLY -->
+  <div class="tab-panel" id="panel-weekly">
+    <div class="field">
+      <label>Channel Niche</label>
+      <input type="text" id="week-niche" placeholder="e.g. Fitness for beginners…"/>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>Videos per Week</label>
+        <select id="week-freq">
+          <option value="2">2 videos/week</option>
+          <option value="3" selected>3 videos/week</option>
+          <option value="5">5 videos/week</option>
+          <option value="7">Daily (7/week)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Goal</label>
+        <select id="week-goal">
+          <option value="grow subscribers">Grow Subscribers</option>
+          <option value="increase watch time">Increase Watch Time</option>
+          <option value="monetize">Monetization Ready</option>
+          <option value="go viral">Go Viral</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn" id="weekBtn" onclick="generateWeekly()">Build Weekly Plan</button>
+  </div>
+
+</div>
+
+<div class="results" id="results"></div>
+
+<script>
+// ── State ──
+const FREE_LIMIT = 3;
+let usedCount = parseInt(localStorage.getItem('tubeIdea_used') || '0');
+let isPro = localStorage.getItem('tubeIdea_pro') === 'true';
+
+// Replace with your Stripe payment link
+const STRIPE_LINK = 'https://buy.stripe.com/YOUR_STRIPE_LINK';
+// Replace with your valid pro keys (comma separated) or use a backend check
+const PRO_KEYS = ['PRO-TUBEIDEA-2024', 'PRO-TUBEIDEA-RAYAN'];
+
+function initUI() {
+  if (isPro) {
+    document.getElementById('planLabel').textContent = '✨ Pro Plan';
+    document.getElementById('upgradeBtn').classList.add('hidden');
+    document.getElementById('proBadge').style.display = 'inline';
+    document.getElementById('limitInner').classList.add('pro-active');
+    document.getElementById('limitText').innerHTML = '✨ <strong>Unlimited</strong> — Pro Plan Active';
+    document.getElementById('limitFill').style.width = '100%';
+    document.getElementById('limitFill').style.background = '#f59e0b';
+    document.querySelectorAll('.lock').forEach(l => l.textContent = '');
+  } else {
+    updateLimitBar();
+    document.querySelectorAll('.lock').forEach(l => l.textContent = '🔒');
+  }
+}
+
+function updateLimitBar() {
+  const remaining = Math.max(0, FREE_LIMIT - usedCount);
+  const pct = (remaining / FREE_LIMIT) * 100;
+  document.getElementById('limitText').innerHTML = `<strong>${remaining}</strong> free idea${remaining !== 1 ? 's' : ''} remaining`;
+  document.getElementById('limitFill').style.width = pct + '%';
+  if (remaining === 0) {
+    document.getElementById('limitFill').style.background = '#ef4444';
+  }
+}
+
+function saveUsed() {
+  localStorage.setItem('tubeIdea_used', usedCount);
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  const tabs = ['ideas','seo','thumbnail','weekly'];
+  document.querySelectorAll('.tab-btn')[tabs.indexOf(tab)].classList.add('active');
+  document.getElementById('panel-'+tab).classList.add('active');
+  document.getElementById('results').innerHTML = '';
+}
+
+function switchTabPro(tab) {
+  if (!isPro) { showModal(); return; }
+  switchTab(tab);
+}
+
+function showModal() { document.getElementById('proModal').classList.remove('hidden'); }
+function closeModal() { document.getElementById('proModal').classList.add('hidden'); }
+
+function goToStripe() { window.open(STRIPE_LINK, '_blank'); }
+
+function activatePro() {
+  const key = document.getElementById('proKeyInput').value.trim().toUpperCase();
+  if (PRO_KEYS.includes(key)) {
+    isPro = true;
+    localStorage.setItem('tubeIdea_pro', 'true');
+    closeModal();
+    initUI();
+    alert('🎉 Pro activated! Enjoy unlimited access.');
+  } else {
+    alert('❌ Invalid key. Please check your key and try again.');
+  }
+}
+
+async function callClaude(prompt, maxTokens=1200) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      model:'claude-sonnet-4-6',
+      max_tokens:maxTokens,
+      messages:[{role:'user',content:prompt}]
+    })
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message);
+  return data.content.map(b=>b.text||'').join('').replace(/```json|```/g,'').trim();
+}
+
+// ── IDEAS ──
+async function generateIdeas() {
+  if (!isPro && usedCount >= FREE_LIMIT) { showModal(); return; }
+  const niche = document.getElementById('niche').value.trim();
+  const style = document.getElementById('style').value;
+  const count = isPro ? document.getElementById('count').value : Math.min(document.getElementById('count').value, 3);
+  const audience = document.getElementById('audience').value.trim();
+  if (!niche) { showError('Please enter your niche first.'); return; }
+
+  const btn = document.getElementById('ideasBtn');
+  btn.disabled = true;
+  showLoader(`Generating ideas for <strong>${h(niche)}</strong>…`);
+
+  const prompt = `You are a top YouTube strategist. Generate exactly ${count} high-potential YouTube video ideas for a ${style} channel about: "${niche}". ${audience ? 'Target audience: '+audience+'.' : ''}
+
+Return ONLY valid JSON array, no markdown:
+[{"title":"...","hook":"Opening hook sentence","format":"Tutorial/Story/List/etc","potential":"Low/Medium/High/Viral","description":"2-3 sentences why this performs well.","seo_title":"SEO version of title","thumbnail_idea":"Brief thumbnail concept.","description_text":"Short YouTube description with keywords."}]`;
+
+  try {
+    const ideas = JSON.parse(await callClaude(prompt));
+    if (!isPro) { usedCount++; saveUsed(); updateLimitBar(); }
+    renderIdeas(ideas, niche);
+  } catch(e) { showError(e.message); }
+  finally { btn.disabled = false; }
+}
+
+function renderIdeas(ideas, niche) {
+  const results = document.getElementById('results');
+  results.innerHTML = `<div class="results-header">${ideas.length} ideas for "${h(niche)}"</div>`;
+  ideas.forEach((idea,i) => {
+    const pc = idea.potential?.toLowerCase()==='viral'?'viral':idea.potential?.toLowerCase()==='high'?'potential':'';
+    const card = document.createElement('div');
+    card.className = 'idea-card';
+    card.innerHTML = `
+      <button class="copy-btn" onclick="copyText(this,'${esc(idea.title)}')">Copy</button>
+      <div class="idea-num">Idea ${i+1}</div>
+      <div class="idea-title">${h(idea.title)}</div>
+      <div class="idea-meta">
+        ${idea.format?`<span class="tag format">📹 ${h(idea.format)}</span>`:''}
+        ${idea.potential?`<span class="tag ${pc}">🔥 ${h(idea.potential)} potential</span>`:''}
+      </div>
+      ${idea.description?`<div class="idea-desc">${h(idea.description)}</div>`:''}
+      ${(idea.hook||idea.seo_title||idea.thumbnail_idea)?`
+      <div class="expand-section">
+        <button class="expand-btn" onclick="toggleExpand(this)">▼ Show more</button>
+        <div class="expand-content">
+          ${idea.hook?`<div class="detail-row" style="margin-top:9px"><div class="detail-label">🎣 Hook</div><div class="detail-val">${h(idea.hook)}</div></div>`:''}
+          ${idea.seo_title?`<div class="detail-row"><div class="detail-label">🎯 SEO Title</div><div class="detail-val">${h(idea.seo_title)}</div></div>`:''}
+          ${idea.thumbnail_idea?`<div class="detail-row"><div class="detail-label">🖼️ Thumbnail</div><div class="detail-val">${h(idea.thumbnail_idea)}</div></div>`:''}
+          ${idea.description_text?`<div class="detail-row"><div class="detail-label">📝 Description</div><div class="detail-val">${h(idea.description_text)}</div></div>`:''}
+        </div>
+      </div>`:''}
+    `;
+    results.appendChild(card);
+  });
+
+  if (!isPro && usedCount >= FREE_LIMIT) {
+    const upsell = document.createElement('div');
+    upsell.style.cssText = 'background:linear-gradient(135deg,#f59e0b11,#f9731611);border:1px solid #f59e0b44;border-radius:12px;padding:20px;text-align:center;margin-top:12px';
+    upsell.innerHTML = `
+      <div style="font-size:1.5rem;margin-bottom:8px">🔒</div>
+      <div style="font-family:Space Grotesk,sans-serif;font-weight:700;margin-bottom:6px">You've used all 3 free ideas</div>
+      <div style="font-size:.83rem;color:var(--muted);margin-bottom:14px">Upgrade to Pro for unlimited ideas + SEO titles, thumbnails & weekly plans</div>
+      <button onclick="showModal()" style="background:linear-gradient(135deg,#f59e0b,#f97316);color:white;border:none;border-radius:9px;padding:11px 22px;font-family:Space Grotesk,sans-serif;font-weight:700;font-size:.9rem;cursor:pointer">⚡ Upgrade to Pro — $9.99/mo</button>
+    `;
+    results.appendChild(upsell);
+  }
+}
+
+// ── SEO ──
+async function generateSEO() {
+  const topic = document.getElementById('seo-topic').value.trim();
+  const keyword = document.getElementById('seo-keyword').value.trim();
+  const tone = document.getElementById('seo-tone').value;
+  if (!topic) { showError('Please enter a video topic.'); return; }
+  const btn = document.getElementById('seoBtn');
+  btn.disabled = true;
+  showLoader('Generating SEO titles…');
+  const prompt = `YouTube SEO expert. Generate 8 optimized titles for: "${topic}". Keyword: "${keyword}". Tone: ${tone}. Return ONLY JSON array: [{"title":"...","ctr_score":"Low/Medium/High/Very High","why":"One sentence."}]`;
+  try {
+    const titles = JSON.parse(await callClaude(prompt, 800));
+    const results = document.getElementById('results');
+    results.innerHTML = `<div class="results-header">8 SEO titles for "${h(topic)}"</div>`;
+    titles.forEach((t,i) => {
+      const pc = t.ctr_score==='Very High'?'viral':t.ctr_score==='High'?'potential':'format';
+      const card = document.createElement('div');
+      card.className = 'idea-card';
+      card.innerHTML = `
+        <button class="copy-btn" onclick="copyText(this,'${esc(t.title)}')">Copy</button>
+        <div class="idea-num">Title ${i+1}</div>
+        <div class="idea-title">${h(t.title)}</div>
+        <div class="idea-meta"><span class="tag ${pc}">📈 ${h(t.ctr_score||'')} CTR</span></div>
+        ${t.why?`<div class="idea-desc">${h(t.why)}</div>`:''}
+      `;
+      results.appendChild(card);
+    });
+  } catch(e) { showError(e.message); }
+  finally { btn.disabled = false; }
+}
+
+// ── THUMBNAIL ──
+async function generateThumbnail() {
+  const title = document.getElementById('thumb-title').value.trim();
+  const style = document.getElementById('thumb-style').value;
+  if (!title) { showError('Please enter a video title.'); return; }
+  const btn = document.getElementById('thumbBtn');
+  btn.disabled = true;
+  showLoader('Creating thumbnail concepts…');
+  const prompt = `YouTube thumbnail designer. Create 5 concepts for: "${title}". Style: ${style}. Return ONLY JSON: [{"concept":"...","layout":"...","text_overlay":"max 5 words","colors":"...","tip":"pro tip"}]`;
+  try {
+    const thumbs = JSON.parse(await callClaude(prompt, 900));
+    const results = document.getElementById('results');
+    results.innerHTML = `<div class="results-header">5 thumbnail concepts</div>`;
+    thumbs.forEach((t,i) => {
+      const card = document.createElement('div');
+      card.className = 'idea-card';
+      card.innerHTML = `
+        <div class="idea-num">Concept ${i+1}</div>
+        <div class="idea-title">${h(t.concept||'Concept')}</div>
+        ${t.layout?`<div class="detail-row" style="margin-top:9px"><div class="detail-label">📐 Layout</div><div class="detail-val">${h(t.layout)}</div></div>`:''}
+        ${t.text_overlay?`<div class="detail-row"><div class="detail-label">✏️ Text</div><div class="detail-val" style="font-weight:700;color:var(--red)">"${h(t.text_overlay)}"</div></div>`:''}
+        ${t.colors?`<div class="detail-row"><div class="detail-label">🎨 Colors</div><div class="detail-val">${h(t.colors)}</div></div>`:''}
+        ${t.tip?`<div class="detail-row"><div class="detail-label">💡 Pro Tip</div><div class="detail-val">${h(t.tip)}</div></div>`:''}
+      `;
+      results.appendChild(card);
+    });
+  } catch(e) { showError(e.message); }
+  finally { btn.disabled = false; }
+}
+
+// ── WEEKLY ──
+async function generateWeekly() {
+  const niche = document.getElementById('week-niche').value.trim();
+  const freq = document.getElementById('week-freq').value;
+  const goal = document.getElementById('week-goal').value;
+  if (!niche) { showError('Please enter your niche.'); return; }
+  const btn = document.getElementById('weekBtn');
+  btn.disabled = true;
+  showLoader('Building weekly plan…');
+  const daysMap = {'2':['Tuesday','Friday'],'3':['Monday','Wednesday','Friday'],'5':['Mon','Tue','Wed','Thu','Fri'],'7':['Mon','Tue','Wed','Thu','Fri','Sat','Sun']};
+  const days = daysMap[freq];
+  const prompt = `YouTube strategist. Weekly content plan for "${niche}" channel. Posting: ${days.join(', ')}. Goal: ${goal}. Return ONLY JSON array: [{"day":"...","title":"...","type":"Short/Long/Shorts","hook":"...","why":"..."}]`;
+  try {
+    const plan = JSON.parse(await callClaude(prompt, 900));
+    const results = document.getElementById('results');
+    results.innerHTML = `<div class="results-header">Weekly plan for "${h(niche)}"</div>`;
+    plan.forEach(d => {
+      const div = document.createElement('div');
+      div.className = 'week-day';
+      div.innerHTML = `
+        <div class="day-label">📅 ${h(d.day)}</div>
+        <div class="day-title">${h(d.title)}</div>
+        <div class="idea-meta" style="margin:5px 0"><span class="tag format">🎬 ${h(d.type||'Video')}</span></div>
+        ${d.hook?`<div class="day-meta">🎣 ${h(d.hook)}</div>`:''}
+        ${d.why?`<div class="day-meta" style="margin-top:4px;font-size:.71rem">💡 ${h(d.why)}</div>`:''}
+      `;
+      results.appendChild(div);
+    });
+  } catch(e) { showError(e.message); }
+  finally { btn.disabled = false; }
+}
+
+// ── Helpers ──
+function toggleExpand(btn) {
+  const c = btn.nextElementSibling;
+  const open = c.classList.toggle('open');
+  btn.textContent = open ? '▲ Hide details' : '▼ Show more';
+}
+function copyText(btn, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓ Copied!'; btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('copied');},2000);
+  });
+}
+function showLoader(msg) { document.getElementById('results').innerHTML=`<div class="loader"><div class="pulse-ring"></div><p>${msg}</p></div>`; }
+function showError(msg) { document.getElementById('results').innerHTML=`<div class="error-msg">⚠️ ${msg}</div>`; }
+function h(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function esc(s){return String(s||'').replace(/'/g,"\\'").replace(/"/g,'&quot;')}
+
+document.getElementById('niche').addEventListener('keydown',e=>{if(e.key==='Enter')generateIdeas();});
+initUI();
+</script>
+</body>
+  </html>
